@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "issue-insight-tracker"
+version = "0.1.0"
+description = ""
+authors = ["Suganth-coder <sugupr1234@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.14"
+uvicorn = "^0.35.0"
+clerk-backend-api = "^3.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
