@@ -1,6 +1,9 @@
 # Backend
-backend/.env
+.env
 backend/poetry.lock
+backend/test.py
+
+__pycache__/
 
 # Frontend 
 frontend/package-lock.json
@@ -19,10 +22,9 @@ frontend/.DS_Store
 frontend/Thumbs.db
 
 # Env
-frontend/.env
-frontend/.env.*
-frontend/!.env.example
-frontend/!.env.test
+.env.*
+!.env.example
+!.env.test
 
 # Vite
 vite.config.js.timestamp-*
