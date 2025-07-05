@@ -4,14 +4,13 @@ from schemas import UserRoles
 class UserRoleManagement:
     def __init__(self):
         self.db = DataBase(table_name=UserRoles.__tablename__, schema=UserRoles)
-        result = self.db.check_connection()
 
         self.privilege_code = {
             "reporter": 1,
             "maintainer": 2,
             "admin": 3,
         }
-        
+
 
     def add_user_role(self, user_id, email, role="reporter"):
         if role not in self.privilege_code:

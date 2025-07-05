@@ -8,7 +8,6 @@ from library.error_handling import ErrorHandling
 
 class DataBase:
 
-    @ErrorHandling.GeneralErrorHandler
     def __init__(self, table_name, schema):
         url = URL.create(
             drivername=os.getenv("DB_DRIVER"),
