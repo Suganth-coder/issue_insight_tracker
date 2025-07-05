@@ -12,6 +12,7 @@ uvicorn = "^0.35.0"
 clerk-backend-api = "^3.0.3"
 sqlalchemy = "^2.0.41"
 dotenv = "^0.9.9"
+psycopg2-binary = "^2.9.10"
 
 
 [build-system]

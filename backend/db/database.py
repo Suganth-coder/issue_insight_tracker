@@ -4,7 +4,11 @@ from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker
 
+from library.error_handling import ErrorHandling
+
 class DataBase:
+
+    @ErrorHandling.GeneralErrorHandler
     def __init__(self, table_name, schema):
         url = URL.create(
             drivername=os.getenv("DB_DRIVER"),
@@ -12,7 +16,7 @@ class DataBase:
             password=os.getenv("DB_PASSWORD"),
             host=os.getenv("DB_HOST"),
             database=os.getenv("DB_CONNECTIOT_NAME"),
-            port=int(os.getenv("DB_PORT"))
+            port=os.getenv("DB_PORT")
         )
 
         self.engine = create_engine(url)
