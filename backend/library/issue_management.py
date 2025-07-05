@@ -12,9 +12,10 @@ class IssueManagement:
         """
         create_issue used to create a new issue in the database based on roles
 
-        ROLES:
         reporter/ admin: can create issues
         maintainer: cannot create issues
+
+        @return 403 | 200 
         """
 
         if issue_data['role'] == "maintainer":
@@ -33,6 +34,8 @@ class IssueManagement:
         self.db.session.commit()
 
         return 200
+    
+
 
     def get_issue(self, issue_data):
         """
@@ -40,19 +43,21 @@ class IssueManagement:
         
         reporter: can get only their own issues
         maintainer/ admin: can get all issues
+
+        @return list()
         """
         issue_id = issue_data.get("issue_id")
         is_get_all_issues = issue_data.get("get_all_issues", False)
         user_role = issue_data.get("user_role", "reporter")
         user_id = issue_data.get("user_id")
-
+        need_objects = issue_data.get("need_objects", False)
 
         if user_role == "reporter":
             if not is_get_all_issues:
-                filter_data = and_(IssueSchema.issue_id == issue_id, IssueManagement.user_id == user_id)
+                filter_data = and_(IssueSchema.issue_id == issue_id, IssueSchema.created_by == user_id)
 
             else:
-                filter_data = IssueManagement.user_id == user_id
+                filter_data = IssueSchema.created_by == user_id
             
         elif user_role == "maintainer" or user_role == "admin":
             if is_get_all_issues:
@@ -66,10 +71,87 @@ class IssueManagement:
             filter_data
         ).all()
 
-        return issues
+        return [Library.schema_model_to_dict(issue) for issue in issues] if not need_objects else issues
             
     def update_issue(self, issue_data):
-        pass
+        """
+        update issue used to update an existing issue based on the user role
+
+        reporter: cannot update issues
+        maintainer: can update status and severity
+        admin: can update all fields
+
+        @return 404 | 200
+        """
+        issue_id = issue_data.get("issue_id")
+        user_role = issue_data.get("role", "reporter")
+        user_id = issue_data.get("user_id")
+
+        self.role_access = {
+            "reporter":[],
+            "maintainer": ["status", "severity"],
+            "admin": ["title", "description", "status", "severity", "s3_object_key"]
+        }
+        result = self.get_issue({
+            "issue_id": issue_id,
+            "get_all_issues": False,
+            "user_role": user_role,
+            "user_id": user_id,
+            "need_objects": True
+        })
+
+        if len(result) == 0:
+            return 404
+        
+        issue = result[0]
+
+        if issue_data.get("title") and "title" in self.role_access[user_role]:
+            issue.title = issue_data.get("title")
+
+        if issue_data.get("description") and "description" in self.role_access[user_role]:
+            issue.description = issue_data.get("description")
+
+        if issue_data.get("status") and "status" in self.role_access[user_role]:
+            issue.status = issue_data.get("status")
+
+        if issue_data.get("severity") and "severity" in self.role_access[user_role]:
+            issue.severity = issue_data.get("severity")
+
+        if issue_data.get("s3_object_key") and "s3_object_key" in self.role_access[user_role]:
+            issue.s3_object_key = issue_data.get("s3_object_key")
+        
+        self.db.session.add(issue)
+        self.db.session.commit()
+
+        return 200
 
     def delete_issue(self,  issue_data):
-        pass
+        """
+        delete_issue used to delete an existing issue based on the user role
+
+        reporter/maintainer: cannot delete issues
+        admin: can delete issues
+
+        @return 403 | 404 | 200
+        """
+        issue_id = issue_data.get("issue_id")
+        user_role = issue_data.get("role", "reporter")
+
+        if user_role != "admin":
+            return 403
+        
+        result = self.get_issue({
+            "issue_id": issue_id,
+            "get_all_issues": False,
+            "user_role": user_role,
+            "need_objects": True
+        })
+
+        if len(result) == 0:
+            return 404
+        
+        issue = result[0]
+        self.db.session.delete(issue)
+        self.db.session.commit()
+
+        return 200
