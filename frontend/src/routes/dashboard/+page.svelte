@@ -1,6 +1,7 @@
 <script>
-    import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI} from '$lib/issues/issueManagement';
+    import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI, deleteIssueAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
+    import Swal from 'sweetalert2';
 
     let issues = [];
     let showAddIssuediv = false;
@@ -16,7 +17,7 @@
     let editIssueDescription = '';
     let editIssueStatus = '';
     let editIssueId = null;
-    
+
     const statusOptions = ['open', 'triaged', 'in_progress', 'done'];
 
     function addIssueDIV(){
@@ -92,6 +93,45 @@
             console.error("Error updating issue:", error);
         }
     }
+
+    let confirmDelete = async(issueId) => {
+        const result = await Swal.fire({
+            theme: 'dark',
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+        
+        if (result.isConfirmed) {
+            let result = await deleteIssue(issueId);
+
+            const s_result = await Swal.fire({                
+                theme: 'dark',
+                title: 'Deleted!',
+                text: result ? 'Your issue has been deleted.' : 'Error in deleting the issue.',
+                icon: result ? 'success' : 'error'
+            });
+
+            if (s_result.isConfirmed){
+            await fetchData();
+        }
+        }
+
+    }
+
+    let deleteIssue = async(issueId) => {
+        const token = await get_token();
+        let data = await deleteIssueAPI(issueId,token);
+
+        if(data == 200)
+            return true;
+
+        return false;
+    }
     const fetchData = async() => {
         await getAllIssues();
     };
@@ -123,6 +163,9 @@
                                     <div>
                                         <span class="badge bg-{issue.status === 'open' ? 'warning' : 'success'}">{issue.status}</span>
                                         <button class="btn btn-sm btn-outline-primary ms-2" on:click={() => openEditModal(issue)}>Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger ms-1" on:click={() => confirmDelete(issue.issue_id)}>
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="issue-body">

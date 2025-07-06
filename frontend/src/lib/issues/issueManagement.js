@@ -76,3 +76,20 @@ export async function getAllIssuesAPI(token){
         console.error('Error uploading attachment:', error);
         return 500;
     }}
+
+    export async function deleteIssueAPI(issueId, token){
+        try {
+    
+            const response = await axios.delete(`${PUBLIC_BACKEND_API_URL}/issue/${issueId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            console.log('Successful: ', response.data);
+            return response.data.code; 
+            
+        } catch (error) {
+            console.error('Error uploading attachment:', error);
+            return 500;
+        }}
