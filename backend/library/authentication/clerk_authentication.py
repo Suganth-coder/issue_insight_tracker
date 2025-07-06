@@ -28,10 +28,12 @@ class ClerkAuthentication:
                 user_role = user_management.get_user_role(email=data['user_email'])
 
                 if user_role == 404:
-                    user_management.add_user_role(
+                    user_role = user_management.add_user_role(
                         user_id=data['user_id'],
                         email=data['user_email']
                     )
+
+                data['user_role'] = user_role
 
             return func(data) if is_authorized else 401
         

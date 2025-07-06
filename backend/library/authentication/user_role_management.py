@@ -26,7 +26,7 @@ class UserRoleManagement:
         self.db.session.add(user_role)
         self.db.session.commit()
 
-        return 200
+        return role
 
     def get_user_role(self, email):
 
