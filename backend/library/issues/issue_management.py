@@ -1,12 +1,12 @@
 from db import DataBase
-from schemas import IssueSchema
+from schemas import IssueDBSchema
 from sqlalchemy import or_, and_
 
 from library import Library
 
 class IssueManagement:
     def __init__(self):
-        self.db = DataBase(table_name=IssueSchema.__tablename__, schema=IssueSchema)
+        self.db = DataBase(table_name=IssueDBSchema.__tablename__, schema=IssueDBSchema)
 
     def create_issue(self, issue_data):
         """
@@ -22,7 +22,7 @@ class IssueManagement:
             return 403
         
         issue_id = Library.get_unique_hashed_data(issue_data.get("title") + issue_data.get("user_id"))
-        issue_data = IssueSchema(
+        issue_data = IssueDBSchema(
             issue_id=issue_id,
             title=issue_data.get("title"),
             description=issue_data.get("description"),
@@ -54,20 +54,20 @@ class IssueManagement:
 
         if user_role == "reporter":
             if not is_get_all_issues:
-                filter_data = and_(IssueSchema.issue_id == issue_id, IssueSchema.created_by == user_id)
+                filter_data = and_(IssueDBSchema.issue_id == issue_id, IssueDBSchema.created_by == user_id)
 
             else:
-                filter_data = IssueSchema.created_by == user_id
+                filter_data = IssueDBSchema.created_by == user_id
             
         elif user_role == "maintainer" or user_role == "admin":
             if is_get_all_issues:
                 filter_data = None
 
             else:
-                filter_data = IssueSchema.issue_id == issue_id
+                filter_data = IssueDBSchema.issue_id == issue_id
 
         
-        issues = self.db.session.query(IssueSchema).filter(
+        issues = self.db.session.query(IssueDBSchema).filter(
             filter_data
         ).all()
 

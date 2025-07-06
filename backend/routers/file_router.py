@@ -16,7 +16,11 @@ async def upload_attachment(request: Request, attachment: UploadFile = File(...)
     data = {"attachment": attachment, "file_content": file_content, 
             "role":"reporter","user_id":"test_user_1"}    
     
-    return s3_storage.upload_attachment(data)
+    @ClerkAuthentication.authorize
+    def logic(data):
+        return s3_storage.upload_attachment(data)
+    
+    return logic(data, request)
         
 @file_router.get("/{filename}")
 async def get_attachment(filename: str):

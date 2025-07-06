@@ -35,7 +35,7 @@ class ClerkAuthentication:
 
                 data['user_role'] = user_role
 
-            return func(data) if is_authorized else 401
+            return ClerkAuthentication.response_data(func(data)) if is_authorized else 401
         
         return wrapper
     
@@ -55,3 +55,40 @@ class ClerkAuthentication:
         
         else:
             return {'is_signed_in':False, 'payload':None}
+        
+    def response_data(data):
+
+        status_code = {
+            200: "Sucessful Response",
+            401: "Unauthorized Request",
+            404: "Data Not Found",
+            403: "Forbidden Request",
+            500: "Internal Server Error"
+        }
+        response = {
+            "code": 200,
+            "message": "Success",
+            "data": None,
+            "error": None
+        }
+
+        if type(data) is int:
+            if response.get(data):
+                response['code'] = data
+                response['message'] = status_code[data]
+            else:
+                response['code'] = 500
+                response['message'] = "Internal Error. Not Valid Response Code"
+
+        elif type(data) is list or type(data) is str:
+            response['data'] = data
+
+        elif type(data) is dict:
+            if data.get('code'):
+                response['code'] = data['code']
+                response['message'] = status_code.get(data['code'], "Unknown Status Code")
+
+            data.pop('code', None)
+            response['data'] = data
+
+        return response

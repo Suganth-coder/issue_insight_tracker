@@ -54,7 +54,7 @@ class S3Storage:
             }
         )
         
-        return {"status": 200, "filename": filename}
+        return {"code": 200, "filename": filename}
     
     def get_attachment(self, data):
 

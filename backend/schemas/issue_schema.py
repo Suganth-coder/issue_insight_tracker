@@ -1,22 +1,28 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.sql import func
+from pydantic import BaseModel, AfterValidator
+from typing import Annotated, Optional
 
-Base = declarative_base()
-
-class IssueSchema(Base):
-    __tablename__ = 'issues'
+def is_valid_status(status: str):
+    valid_status = ['open','triaged', 'in_progress', 'done']
+    if status not in valid_status:
+        raise ValueError(f"Invalid status '{status}'. Must be one of {valid_status}")
     
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    issue_id = Column(String, unique=True, nullable=False)
-    created_by = Column(String, nullable=False)
+    return status
+class AddIssue(BaseModel):
+    title: str
+    description: str
+    s3_object_key: str
 
-    title = Column(String, nullable=False)
-    description = Column(String, nullable=True)
-    status = Column(String, nullable=False)
-    severity = Column(String, nullable=True)
-    s3_object_key = Column(String, nullable=True)
+class UpdateIssue(BaseModel):
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[Annotated[str, AfterValidator(is_valid_status)]] = None
+    severity: Optional[str] = None
+    s3_object_key: Optional[str] = None 
+
+class GetIssue(BaseModel):
+    issue_id: Optional[str] = None
+    get_all_issues: Optional[bool] = False
+
+class DeleteIssue(BaseModel):
+    issue_id: str

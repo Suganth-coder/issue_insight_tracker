@@ -1,14 +1,49 @@
 from fastapi import APIRouter,  Response, Request
+from schemas.issue_schema import AddIssue, UpdateIssue, GetIssue, DeleteIssue
 
 from library.authentication import ClerkAuthentication
+from library.issues import IssueManagement
 
 issue_router = APIRouter()
+issue_management = IssueManagement()
 
-@issue_router.get("/test")
-async def add_issue(request: Request):
+@issue_router.post("/add")
+async def add_issue(issue_data: AddIssue, request: Request):
     
     @ClerkAuthentication.authorize
     def logic(data):
-        print(data)
+        return issue_management.add_issue(data)
 
-    return logic({"issueID":"1234"},request)
+    issue_data = issue_data.model_dump()
+    return logic(issue_data,request)
+
+@issue_router.get("/{issue_id}")
+async def get_issue(issue_id: str, request: Request):
+    issue_data = GetIssue(issue_id=issue_id).model_dump()
+
+    @ClerkAuthentication.authorize
+    def logic(data):
+        return issue_management.get_issue(data)
+
+    return logic(issue_data, request)
+
+@issue_router.put("/{issue_id}")
+async def update_issue(issue_id: str, issue_data: UpdateIssue, request: Request):
+    issue_data = issue_data.model_dump()
+    issue_data['issue_id'] = issue_id
+
+    @ClerkAuthentication.authorize
+    def logic(data):
+        return issue_management.update_issue(data)
+
+    return logic(issue_data, request)
+
+@issue_router.delete("/{issue_id}") 
+async def delete_issue(issue_id: str, request: Request):
+    issue_data = DeleteIssue(issue_id=issue_id).model_dump()
+
+    @ClerkAuthentication.authorize
+    def logic(data):
+        return issue_management.delete_issue(data)
+
+    return logic(issue_data, request)

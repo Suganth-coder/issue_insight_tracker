@@ -1,2 +1,2 @@
 from .user_roles import UserRoles
-from .issue_schema import IssueSchema
+from .issue_db_schema import IssueDBSchema
