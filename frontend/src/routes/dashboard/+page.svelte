@@ -1,6 +1,8 @@
 <script>
     import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI, deleteIssueAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
+    import {role} from '$lib/issues/roles';
+
     import Swal from 'sweetalert2';
 
     let issues = [];
@@ -16,9 +18,11 @@
     let editIssueTitle = '';
     let editIssueDescription = '';
     let editIssueStatus = '';
+    let editIssueSeverity = '';
     let editIssueId = null;
 
     const statusOptions = ['open', 'triaged', 'in_progress', 'done'];
+    const severityOptions = ['low', 'medium', 'high'];
 
     function addIssueDIV(){
         showAddIssuediv = true;
@@ -29,6 +33,7 @@
         editIssueTitle = issue.title;
         editIssueDescription = issue.description;
         editIssueStatus = issue.status;
+        editIssueSeverity = issue.severity || 'low'; 
         editIssueId = issue.issue_id;
         showEditIssuediv = true;
     }
@@ -78,7 +83,8 @@
             issue_id: editIssueId,
             title: editIssueTitle,
             description: editIssueDescription,
-            status: editIssueStatus
+            status: editIssueStatus,
+            severity: editIssueSeverity
         }
         
         try {
@@ -161,7 +167,11 @@
                                 <div class="issue-header d-flex justify-content-between">
                                     <h5 class="issue-title">{issue.title}</h5>
                                     <div>
-                                        <span class="badge bg-{issue.status === 'open' ? 'warning' : 'success'}">{issue.status}</span>
+                                        <span class="badge bg-{issue.status === 'open' ? 'warning' : 'success'} me-1">{issue.status}</span>
+                                        <span class="badge bg-{
+                                            issue.severity === 'low' ? 'info' : 
+                                            issue.severity === 'medium' ? 'warning' : 'danger'
+                                        } me-1">{issue.severity || 'low'}</span>
                                         <button class="btn btn-sm btn-outline-primary ms-2" on:click={() => openEditModal(issue)}>Edit</button>
                                         <button class="btn btn-sm btn-outline-danger ms-1" on:click={() => confirmDelete(issue.issue_id)}>
                                             <i class="bi bi-trash"></i>
@@ -240,6 +250,14 @@
                 <select class="form-select" id="editIssueStatus" bind:value={editIssueStatus}>
                     {#each statusOptions as status}
                         <option value={status}>{status.replace('_', ' ')}</option>
+                    {/each}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="editIssueSeverity">Severity</label>
+                <select class="form-select" id="editIssueSeverity" bind:value={editIssueSeverity}>
+                    {#each severityOptions as severity}
+                        <option value={severity}>{severity}</option>
                     {/each}
                 </select>
             </div>
