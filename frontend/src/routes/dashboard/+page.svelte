@@ -1,5 +1,5 @@
 <script>
-    import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI, deleteIssueAPI} from '$lib/issues/issueManagement';
+    import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI, deleteIssueAPI, getUserRoleAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
     import {role} from '$lib/issues/roles';
 
@@ -42,6 +42,18 @@
     let get_token = async () => {
         return await context.session?.getToken();
     };
+
+    let getUserRole = async() => {
+        const token = await get_token();
+        if (token){
+            let userRole = await getUserRoleAPI(token);
+
+            if (userRole != 500)
+                role.set(userRole);
+
+            console.log("User Role: ", userRole);
+        }
+    }
 
     let addAttachment = async(file) => {
         if (!file) return;
@@ -139,6 +151,7 @@
         return false;
     }
     const fetchData = async() => {
+        await getUserRole();
         await getAllIssues();
     };
 
@@ -172,10 +185,14 @@
                                             issue.severity === 'low' ? 'info' : 
                                             issue.severity === 'medium' ? 'warning' : 'danger'
                                         } me-1">{issue.severity || 'low'}</span>
-                                        <button class="btn btn-sm btn-outline-primary ms-2" on:click={() => openEditModal(issue)}>Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger ms-1" on:click={() => confirmDelete(issue.issue_id)}>
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        {#if $role !== "reporter"}
+                                            <button class="btn btn-sm btn-outline-primary ms-2" on:click={() => openEditModal(issue)}>Edit</button>
+                                        {/if}
+                                        {#if $role === "admin"}
+                                            <button class="btn btn-sm btn-outline-danger ms-1" on:click={() => confirmDelete(issue.issue_id)}>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        {/if}
                                     </div>
                                 </div>
                                 <div class="issue-body">
@@ -237,22 +254,26 @@
             <button type="button" class="close-btn" on:click={() => showEditIssuediv = false}>&times;</button>
         </div>
         <div class="popup-body">
-            <div class="form-group mb-3">
-                <label for="editIssueTitle">Title</label>
-                <input type="text" class="form-control" id="editIssueTitle" bind:value={editIssueTitle} placeholder="Enter issue title">
-            </div>
-            <div class="form-group mb-3">
-                <label for="editIssueDescription">Description</label>
-                <textarea class="form-control" id="editIssueDescription" bind:value={editIssueDescription} rows="4" placeholder="Describe the issue"></textarea>
-            </div>
-            <div class="form-group mb-3">
-                <label for="editIssueStatus">Status</label>
-                <select class="form-select" id="editIssueStatus" bind:value={editIssueStatus}>
-                    {#each statusOptions as status}
-                        <option value={status}>{status.replace('_', ' ')}</option>
-                    {/each}
-                </select>
-            </div>
+            {#if $role === "admin"}
+                <div class="form-group mb-3">
+                    <label for="editIssueTitle">Title</label>
+                    <input type="text" class="form-control" id="editIssueTitle" bind:value={editIssueTitle} placeholder="Enter issue title">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="editIssueDescription">Description</label>
+                    <textarea class="form-control" id="editIssueDescription" bind:value={editIssueDescription} rows="4" placeholder="Describe the issue"></textarea>
+                </div>
+            {/if}
+            {#if $role === "admin" || $role === "maintainer"}
+                <div class="form-group mb-3">
+                    <label for="editIssueStatus">Status</label>
+                    <select class="form-select" id="editIssueStatus" bind:value={editIssueStatus}>
+                        {#each statusOptions as status}
+                            <option value={status}>{status.replace('_', ' ')}</option>
+                        {/each}
+                    </select>
+                </div>
+            {/if}
             <div class="form-group mb-3">
                 <label for="editIssueSeverity">Severity</label>
                 <select class="form-select" id="editIssueSeverity" bind:value={editIssueSeverity}>
@@ -274,6 +295,5 @@
 
 <style>
     @import '$lib/styles/dashboard.css';
-    
     
 </style>
