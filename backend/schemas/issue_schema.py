@@ -1,4 +1,4 @@
-from pydantic import BaseModel, AfterValidator
+from pydantic import BaseModel, AfterValidator, BeforeValidator, ValidationError
 from typing import Annotated, Optional
 
 def is_valid_status(status: str):
@@ -7,8 +7,22 @@ def is_valid_status(status: str):
         raise ValueError(f"Invalid status '{status}'. Must be one of {valid_status}")
     
     return status
+
+def is_valid_title(title: str):
+    if title is None:
+        return None
+    
+    title = title.strip()
+    if title:
+        title = title[0].upper() + title[1:]
+    
+    if len(title) < 3:
+        raise ValueError("Title must be at least 3 characters long")
+    
+    return title
+
 class AddIssue(BaseModel):
-    title: str
+    title: Annotated[str, BeforeValidator(is_valid_title)]
     description: str
     s3_object_key: Optional[str] = None
 

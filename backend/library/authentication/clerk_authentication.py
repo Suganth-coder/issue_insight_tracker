@@ -20,8 +20,6 @@ class ClerkAuthentication:
 
                 data['user_email'] = clerk_data['payload']['user_email']
                 data['user_id'] = clerk_data['payload']['user_id']
-
-                print(clerk_data['payload']['user_email'])
     
                 # Get the user role based on email
                 user_management = UserRoleManagement()

@@ -15,7 +15,7 @@ scheduler = BackgroundScheduler()
 
 scheduler.add_job(
     func=sscheduler.log_daily_stats,
-    trigger=IntervalTrigger(minutes=1),
+    trigger=IntervalTrigger(minutes=30),
     id='stats_logging_job',
     name='Log daily stats every 30 minutes',
     replace_existing=True

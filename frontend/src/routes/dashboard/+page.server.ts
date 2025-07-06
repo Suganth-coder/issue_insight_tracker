@@ -1,5 +1,13 @@
 import { redirect } from '@sveltejs/kit';
 
-// export function load(){
-// 	redirect(307, '/')
-// }
+export const load = async ({ locals }) => {
+	const { userId } = locals.auth();
+
+	if (!userId) {
+		return redirect(307, '/');
+	}
+
+	return {
+		userId
+	};
+};

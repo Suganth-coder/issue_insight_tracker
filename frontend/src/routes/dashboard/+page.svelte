@@ -213,7 +213,9 @@
                 <button class="btn btn-info me-2" on:click={showSeverityChart}>
                     <i class="bi bi-graph-up"></i> Severity Chart
                 </button>
-                <button class="btn btn-success" on:click={addIssueDIV}> + Add Issue </button>
+               {#if $role != "maintainer"}
+                    <button class="btn btn-success" on:click={addIssueDIV}> + Add Issue </button>
+                {/if}
             </div>
         </div>
     </div>
@@ -347,5 +349,5 @@
 
 <style>
     @import '$lib/styles/dashboard.css';
-    
+
 </style>

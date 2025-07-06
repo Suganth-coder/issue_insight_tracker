@@ -68,11 +68,11 @@ class IssueManagement:
             else:
                 filter_data = IssueDBSchema.issue_id == issue_id
 
-        
         if issues is None:
             issues = self.db.session.query(IssueDBSchema).filter(
                 filter_data
             ).all()
+        
 
         return [Library.schema_model_to_dict(issue) for issue in issues] if not need_objects else issues
             
@@ -100,7 +100,8 @@ class IssueManagement:
             "get_all_issues": False,
             "user_role": user_role,
             "user_id": user_id,
-            "need_objects": True
+            "need_objects": True,
+            "role": user_role
         })
 
         if len(result) == 0:
@@ -146,11 +147,12 @@ class IssueManagement:
         result = self.get_issue({
             "issue_id": issue_id,
             "get_all_issues": False,
-            "user_role": user_role,
+            "role": user_role,
             "need_objects": True
         })
 
         if len(result) == 0:
+            print('Issue not found for deletion')
             return 404
         
         issue = result[0]

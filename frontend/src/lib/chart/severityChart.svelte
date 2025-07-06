@@ -130,56 +130,70 @@
 
 <style>
     .chart-modal {
-        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(18, 18, 18, 0.85);
-        z-index: 1000;
-        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
         align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
     }
     
     .chart-modal.show {
-        display: flex;
+        opacity: 1;
+        pointer-events: auto;
     }
     
     .chart-content {
-        background-color: var(--dark-surface);
-        border: 1px solid var(--dark-border);
+        background-color: white;
         border-radius: 8px;
         width: 90%;
         max-width: 700px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-        animation: popIn 0.3s ease-out;
-        color: var(--dark-text-primary);
-    }
-    
-    @keyframes popIn {
-        0% {
-            transform: scale(0.8);
-            opacity: 0;
-        }
-        100% {
-            transform: scale(1);
-            opacity: 1;
-        }
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
     
     .chart-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.25rem;
-        border-bottom: 1px solid var(--dark-border);
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
     }
     
-    .chart-header h3 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
+    .chart-body {
+        padding: 1rem;
+    }
+    
+    .chart-container {
+        height: 40vh;
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .chart-summary {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+        text-align: center;
+    }
+    
+    .no-data {
+        font-style: italic;
+        color: #999;
+    }
+    
+    .chart-footer {
+        padding: 1rem;
+        border-top: 1px solid #e9ecef;
+        text-align: right;
     }
     
     .close-btn {
@@ -187,53 +201,5 @@
         border: none;
         font-size: 1.5rem;
         cursor: pointer;
-        padding: 0;
-        color: var(--dark-text-secondary);
-        box-shadow: none;
-    }
-    
-    .close-btn:hover {
-        color: var(--dark-text-primary);
-        transform: none;
-        box-shadow: none;
-    }
-    
-    .chart-body {
-        padding: 1.25rem;
-    }
-    
-    .chart-container {
-        height: 40vh;
-        position: relative;
-        margin-bottom: 1rem;
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        padding: 1rem;
-    }
-    
-    .chart-summary {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-        color: var(--dark-text-secondary);
-        text-align: center;
-    }
-    
-    .no-data {
-        font-style: italic;
-        color: var(--dark-text-secondary);
-        opacity: 0.7;
-    }
-    
-    .chart-footer {
-        padding: 1.25rem;
-        border-top: 1px solid var(--dark-border);
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.75rem;
-    }
-    
-    .chart-footer .btn-secondary {
-        background-color: #2a2a2a;
-        border-color: var(--dark-border);
     }
 </style>
