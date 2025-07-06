@@ -1,11 +1,15 @@
 <script>
-    import {addAttachment} from '$lib/issues/issueManagement';
+    import {addAttachmentAPI, addIssueAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
 
     let issues = [];
     let showAddIssuediv = false;
+    let filename = null;
 
-    function addIssue(){
+    let issueTitle = '';
+    let issueDescription = '';
+
+    function addIssueDIV(){
         showAddIssuediv = true;
     }
 
@@ -14,11 +18,30 @@
         return await context.session?.getToken();
     };
 
-    let uploadAttachment = async(file) => {
+    let addAttachment = async(file) => {
         if (!file) return;
         const token = await get_token();
-        addAttachment(file, token);
+        let result = await addAttachmentAPI(file, token);
+
+        if (result != 500) {
+            filename = result;
+        }
     }
+
+    let addIssue = async() => {
+
+        const token = await get_token();
+
+        let data = {
+            title: issueTitle,
+            description: issueDescription,
+            s3_object_key: filename
+        }
+        let result = await addIssueAPI(data, token);
+        // Based on result fire the event
+    }
+
+    
 </script>
 
 
@@ -26,7 +49,7 @@
     <div class="row">
         <div class="col-12 d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">Issues</h2>
-            <button on:click={addIssue}> + Add Issue </button>
+            <button on:click={addIssueDIV}> + Add Issue </button>
         </div>
     </div>
     <div class="row">
@@ -54,20 +77,20 @@
         <div class="popup-body">
             <div class="form-group mb-3">
             <label for="issueTitle">Title</label>
-            <input type="text" class="form-control" id="issueTitle" placeholder="Enter issue title">
+            <input type="text" class="form-control" id="issueTitle" bind:value={issueTitle} placeholder="Enter issue title">
             </div>
             <div class="form-group mb-3">
             <label for="issueDescription">Description</label>
-            <textarea class="form-control" id="issueDescription" rows="4" placeholder="Describe the issue"></textarea>
+            <textarea class="form-control" id="issueDescription" bind:value={issueDescription} rows="4" placeholder="Describe the issue"></textarea>
             </div>
             <div class="form-group mb-4">
             <label for="issueFile">Attachment (Optional)</label>
-            <input type="file" class="form-control" id="issueFile" on:change={uploadAttachment} name="attachment">
+            <input type="file" class="form-control"  id="issueFile" filename={filename} on:change={addAttachment} name="attachment">
             </div>
         </div>
         <div class="popup-footer">
             <button type="button" class="btn btn-secondary" on:click={() => showAddIssuediv = false}>Cancel</button>
-            <button type="button" class="btn btn-secondary">Add Issue</button>
+            <button type="button" class="btn btn-secondary" on:click={addIssue}>Add Issue</button>
         </div>
         </div>
     </div>

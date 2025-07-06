@@ -1,7 +1,7 @@
 import {PUBLIC_BACKEND_API_URL} from '$env/static/public';
 import axios from 'axios';
 
-export async function addAttachment(event, token) {
+export async function addAttachmentAPI(event, token) {
     try {
         const file = event.target?.files[0];
         
@@ -15,10 +15,47 @@ export async function addAttachment(event, token) {
             }
         });
         
-        console.log('Upload successful:', response.data);
-        return response.data;
+        let filename = response.data.data.filename
+        console.log('Upload successful:', filename);
+        return filename; 
+        
     } catch (error) {
         console.error('Error uploading attachment:', error);
-        throw error;
+        return 500;
     }
 }
+
+export async function addIssueAPI(data, token){
+    try {
+
+        const response = await axios.post(`${PUBLIC_BACKEND_API_URL}/issue/add`, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        console.log('Successful: ', response.data);
+        return response.data; 
+        
+    } catch (error) {
+        console.error('Error uploading attachment:', error);
+        return 500;
+    }
+}
+
+export async function updateIssueAPI(data, token){    
+    try {
+
+    const response = await axios.put(`${PUBLIC_BACKEND_API_URL}/issue/update`, data, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    
+    console.log('Successful: ', response.data);
+    return response.data; 
+    
+} catch (error) {
+    console.error('Error uploading attachment:', error);
+    return 500;
+}}
