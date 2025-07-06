@@ -10,7 +10,7 @@ def is_valid_status(status: str):
 class AddIssue(BaseModel):
     title: str
     description: str
-    s3_object_key: str
+    s3_object_key: Optional[str] = None
 
 class UpdateIssue(BaseModel):
 
@@ -20,9 +20,6 @@ class UpdateIssue(BaseModel):
     severity: Optional[str] = None
     s3_object_key: Optional[str] = None 
 
-class GetIssue(BaseModel):
-    issue_id: Optional[str] = None
-    get_all_issues: Optional[bool] = False
 
 class DeleteIssue(BaseModel):
     issue_id: str

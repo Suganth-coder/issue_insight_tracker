@@ -33,9 +33,9 @@ class ClerkAuthentication:
                         email=data['user_email']
                     )
 
-                data['user_role'] = user_role
+                data['role'] = user_role
 
-            return ClerkAuthentication.response_data(func(data)) if is_authorized else 401
+            return ClerkAuthentication.response_data(func(data)) if is_authorized else ClerkAuthentication.response_data(401)
         
         return wrapper
     
@@ -73,12 +73,8 @@ class ClerkAuthentication:
         }
 
         if type(data) is int:
-            if response.get(data):
-                response['code'] = data
-                response['message'] = status_code[data]
-            else:
-                response['code'] = 500
-                response['message'] = "Internal Error. Not Valid Response Code"
+            response['code'] = data
+            response['message'] = status_code[data]
 
         elif type(data) is list or type(data) is str:
             response['data'] = data

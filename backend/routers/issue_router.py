@@ -1,5 +1,5 @@
 from fastapi import APIRouter,  Response, Request
-from schemas.issue_schema import AddIssue, UpdateIssue, GetIssue, DeleteIssue
+from schemas.issue_schema import AddIssue, UpdateIssue, DeleteIssue
 
 from library.authentication import ClerkAuthentication
 from library.issues import IssueManagement
@@ -12,20 +12,19 @@ async def add_issue(issue_data: AddIssue, request: Request):
     
     @ClerkAuthentication.authorize
     def logic(data):
-        return issue_management.add_issue(data)
+        return issue_management.create_issue(data)
 
     issue_data = issue_data.model_dump()
     return logic(issue_data,request)
 
-@issue_router.get("/{issue_id}")
-async def get_issue(issue_id: str, request: Request):
-    issue_data = GetIssue(issue_id=issue_id).model_dump()
+@issue_router.get("/all")
+async def get_issue( request: Request):
 
     @ClerkAuthentication.authorize
     def logic(data):
         return issue_management.get_issue(data)
 
-    return logic(issue_data, request)
+    return logic({"get_all_issues":True}, request)
 
 @issue_router.put("/{issue_id}")
 async def update_issue(issue_id: str, issue_data: UpdateIssue, request: Request):

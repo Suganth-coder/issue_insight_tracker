@@ -20,11 +20,12 @@ class IssueManagement:
 
         if issue_data['role'] == "maintainer":
             return 403
-        
+
         issue_id = Library.get_unique_hashed_data(issue_data.get("title") + issue_data.get("user_id"))
         issue_data = IssueDBSchema(
             issue_id=issue_id,
             title=issue_data.get("title"),
+            s3_object_key=issue_data.get("s3_object_key"),
             description=issue_data.get("description"),
             status=issue_data.get("status", "open"),
             created_by=issue_data.get("user_id")
@@ -33,9 +34,8 @@ class IssueManagement:
         self.db.session.add(issue_data)
         self.db.session.commit()
 
-        return 200
+        return {'code':200, 'issue_id':issue_id}
     
-
 
     def get_issue(self, issue_data):
         """
