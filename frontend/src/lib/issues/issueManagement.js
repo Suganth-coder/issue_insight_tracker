@@ -46,7 +46,7 @@ export async function addIssueAPI(data, token){
 export async function updateIssueAPI(data, token){    
     try {
 
-    const response = await axios.put(`${PUBLIC_BACKEND_API_URL}/issue/update`, data, {
+    const response = await axios.put(`${PUBLIC_BACKEND_API_URL}/issue/${data.issue_id}`, data, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

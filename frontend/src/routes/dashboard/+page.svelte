@@ -1,16 +1,35 @@
 <script>
-    import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI} from '$lib/issues/issueManagement';
+    import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
 
     let issues = [];
     let showAddIssuediv = false;
+    let showEditIssuediv = false;
     let filename = null;
 
     let issueTitle = '';
     let issueDescription = '';
 
+
+    let editingIssue = null;
+    let editIssueTitle = '';
+    let editIssueDescription = '';
+    let editIssueStatus = '';
+    let editIssueId = null;
+    
+    const statusOptions = ['open', 'triaged', 'in_progress', 'done'];
+
     function addIssueDIV(){
         showAddIssuediv = true;
+    }
+
+    function openEditModal(issue) {
+        editingIssue = issue;
+        editIssueTitle = issue.title;
+        editIssueDescription = issue.description;
+        editIssueStatus = issue.status;
+        editIssueId = issue.issue_id;
+        showEditIssuediv = true;
     }
 
     const context = useClerkContext();
@@ -41,6 +60,7 @@
 
     }
 
+
     let getAllIssues = async () => {
         const token = await get_token();
         let issuesData = await getAllIssuesAPI(token);
@@ -50,6 +70,28 @@
 
     }
 
+    let updateIssue = async() => {
+        const token = await get_token();
+        
+        let data = {
+            issue_id: editIssueId,
+            title: editIssueTitle,
+            description: editIssueDescription,
+            status: editIssueStatus
+        }
+        
+        try {
+            console.log("Issue ID: ",data['issue_id'])
+            let result = await updateIssueAPI(data, token);
+            if (result !== 500) {
+                await getAllIssues();
+                showEditIssuediv = false;
+                console.log("Issue updated successfully:", result);
+            }
+        } catch (error) {
+            console.error("Error updating issue:", error);
+        }
+    }
     const fetchData = async() => {
         await getAllIssues();
     };
@@ -73,28 +115,31 @@
                         <p class="text-center text-muted py-5">No issue is there</p>
                     {:else}
                         
-                        <div class="issues-container">
-                            {#each issues as issue}
-                                <div class="issue-card mb-3">
-                                    <div class="issue-header d-flex justify-content-between">
-                                        <h5 class="issue-title">{issue.title}</h5>
+                    <div class="issues-container">
+                        {#each issues as issue}
+                            <div class="issue-card mb-3">
+                                <div class="issue-header d-flex justify-content-between">
+                                    <h5 class="issue-title">{issue.title}</h5>
+                                    <div>
                                         <span class="badge bg-{issue.status === 'open' ? 'warning' : 'success'}">{issue.status}</span>
-                                    </div>
-                                    <div class="issue-body">
-                                        <p class="issue-description">{issue.description}</p>
-                                        {#if issue.s3_object_key}
-                                            <div class="issue-attachment">
-                                                <small class="text-muted">Attachment: {issue.s3_object_key}</small>
-                                            </div>
-                                        {/if}
-                                    </div>
-                                    <div class="issue-footer d-flex justify-content-between text-muted">
-                                        <small>Created: {new Date(issue.created_at).toLocaleDateString()}</small>
-                                        <small>Updated: {new Date(issue.updated_at).toLocaleDateString()}</small>
+                                        <button class="btn btn-sm btn-outline-primary ms-2" on:click={() => openEditModal(issue)}>Edit</button>
                                     </div>
                                 </div>
-                            {/each}
-                        </div>
+                                <div class="issue-body">
+                                    <p class="issue-description">{issue.description}</p>
+                                    {#if issue.s3_object_key}
+                                        <div class="issue-attachment">
+                                            <small class="text-muted">Attachment: {issue.s3_object_key}</small>
+                                        </div>
+                                    {/if}
+                                </div>
+                                <div class="issue-footer d-flex justify-content-between text-muted">
+                                    <small>Created: {new Date(issue.created_at).toLocaleDateString()}</small>
+                                    <small>Updated: {new Date(issue.updated_at).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
                         <!-- Listing All Issues End-->
                     {/if}
                 </div>
@@ -132,7 +177,40 @@
     </div>
 {/if}
 
-{fetchData()}
+{#if showEditIssuediv && editingIssue}<div class="add-issue-popup" class:show={showEditIssuediv}>
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3>Edit Issue</h3>
+            <button type="button" class="close-btn" on:click={() => showEditIssuediv = false}>&times;</button>
+        </div>
+        <div class="popup-body">
+            <div class="form-group mb-3">
+                <label for="editIssueTitle">Title</label>
+                <input type="text" class="form-control" id="editIssueTitle" bind:value={editIssueTitle} placeholder="Enter issue title">
+            </div>
+            <div class="form-group mb-3">
+                <label for="editIssueDescription">Description</label>
+                <textarea class="form-control" id="editIssueDescription" bind:value={editIssueDescription} rows="4" placeholder="Describe the issue"></textarea>
+            </div>
+            <div class="form-group mb-3">
+                <label for="editIssueStatus">Status</label>
+                <select class="form-select" id="editIssueStatus" bind:value={editIssueStatus}>
+                    {#each statusOptions as status}
+                        <option value={status}>{status.replace('_', ' ')}</option>
+                    {/each}
+                </select>
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button type="button" class="btn btn-secondary" on:click={() => showEditIssuediv = false}>Cancel</button>
+            <button type="button" class="btn btn-primary" on:click={updateIssue}>Update Issue</button>
+        </div>
+    </div>
+</div>
+{/if}
+
+<div style="display:none;">{fetchData()}</div>
+
 <style>
     @import '$lib/styles/dashboard.css';
     
