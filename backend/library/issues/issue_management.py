@@ -48,9 +48,11 @@ class IssueManagement:
         """
         issue_id = issue_data.get("issue_id")
         is_get_all_issues = issue_data.get("get_all_issues", False)
-        user_role = issue_data.get("user_role", "reporter")
+        user_role = issue_data.get("role", "reporter")
         user_id = issue_data.get("user_id")
         need_objects = issue_data.get("need_objects", False)
+
+        issues = None
 
         if user_role == "reporter":
             if not is_get_all_issues:
@@ -61,15 +63,16 @@ class IssueManagement:
             
         elif user_role == "maintainer" or user_role == "admin":
             if is_get_all_issues:
-                filter_data = None
+                issues = self.db.session.query(IssueDBSchema).all()
 
             else:
                 filter_data = IssueDBSchema.issue_id == issue_id
 
         
-        issues = self.db.session.query(IssueDBSchema).filter(
-            filter_data
-        ).all()
+        if issues is None:
+            issues = self.db.session.query(IssueDBSchema).filter(
+                filter_data
+            ).all()
 
         return [Library.schema_model_to_dict(issue) for issue in issues] if not need_objects else issues
             
