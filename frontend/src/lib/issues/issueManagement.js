@@ -59,3 +59,20 @@ export async function updateIssueAPI(data, token){
     console.error('Error uploading attachment:', error);
     return 500;
 }}
+
+export async function getAllIssuesAPI(token){
+    try {
+
+        const response = await axios.get(`${PUBLIC_BACKEND_API_URL}/issue/all`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        console.log('Successful: ', response.data);
+        return response.data.data; 
+        
+    } catch (error) {
+        console.error('Error uploading attachment:', error);
+        return 500;
+    }}

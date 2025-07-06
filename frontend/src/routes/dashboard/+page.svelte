@@ -1,5 +1,5 @@
 <script>
-    import {addAttachmentAPI, addIssueAPI} from '$lib/issues/issueManagement';
+    import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
 
     let issues = [];
@@ -38,8 +38,21 @@
             s3_object_key: filename
         }
         let result = await addIssueAPI(data, token);
-        // Based on result fire the event
+
     }
+
+    let getAllIssues = async () => {
+        const token = await get_token();
+        let issuesData = await getAllIssuesAPI(token);
+
+        if (issuesData != 500)
+            issues = issuesData;
+
+    }
+
+    const fetchData = async() => {
+        await getAllIssues();
+    };
 
     
 </script>
@@ -59,7 +72,30 @@
                     {#if issues.length === 0}
                         <p class="text-center text-muted py-5">No issue is there</p>
                     {:else}
-                        <!-- Listing All Issues -->
+                        
+                        <div class="issues-container">
+                            {#each issues as issue}
+                                <div class="issue-card mb-3">
+                                    <div class="issue-header d-flex justify-content-between">
+                                        <h5 class="issue-title">{issue.title}</h5>
+                                        <span class="badge bg-{issue.status === 'open' ? 'warning' : 'success'}">{issue.status}</span>
+                                    </div>
+                                    <div class="issue-body">
+                                        <p class="issue-description">{issue.description}</p>
+                                        {#if issue.s3_object_key}
+                                            <div class="issue-attachment">
+                                                <small class="text-muted">Attachment: {issue.s3_object_key}</small>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div class="issue-footer d-flex justify-content-between text-muted">
+                                        <small>Created: {new Date(issue.created_at).toLocaleDateString()}</small>
+                                        <small>Updated: {new Date(issue.updated_at).toLocaleDateString()}</small>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                        <!-- Listing All Issues End-->
                     {/if}
                 </div>
             </div>
@@ -96,6 +132,9 @@
     </div>
 {/if}
 
+{fetchData()}
 <style>
     @import '$lib/styles/dashboard.css';
+    
+    
 </style>
