@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { SignedIn, SignedOut, SignInButton, UserButton} from 'svelte-clerk';
+    import {SignedIn, SignedOut} from 'svelte-clerk';
     import {goto} from '$app/navigation';
-    
+    import Header from '$lib/components/header.svelte';
+
     function gotoDashboard(){
         $effect(() => {
         goto('/dashboard');
@@ -10,21 +11,12 @@
 </script>
 
 <div class="container my-3">
-    <header class="d-flex justify-content-between align-items-center py-3 border-bottom mb-4">
-        <div class="logo">
-            <h1 class="h3 mb-0">Issue Insight Tracker</h1>
-        </div>
-        <div>
-            <SignedOut>
-                <SignInButton />
-            </SignedOut>
-            <SignedIn>
-                {gotoDashboard()}
-                <UserButton />
-            </SignedIn>
-        </div>
-    </header>
+    <Header />
 
+    <SignedIn>
+        {gotoDashboard()}
+    </SignedIn>
+    
     <main class="py-4">
         <SignedOut>
             <div class="card shadow-sm p-4 mb-4 bg-light text-center">

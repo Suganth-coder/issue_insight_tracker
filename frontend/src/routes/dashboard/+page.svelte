@@ -1,10 +1,12 @@
 <script>
     import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI, deleteIssueAPI, getUserRoleAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
-    import {role} from '$lib/issues/roles';
     import { onMount, onDestroy } from 'svelte';
     import {PUBLIC_WEBSOCKET_URL} from '$env/static/public';
+
+    import {role} from '$lib/issues/roles';
     import SeverityChart from '$lib/chart/severityChart.svelte';
+    import Header from '$lib/components/header.svelte';
 
     import Swal from 'sweetalert2';
 
@@ -27,7 +29,7 @@
     let socket;
 
     const statusOptions = ['open', 'triaged', 'in_progress', 'done'];
-    const severityOptions = ['low', 'medium', 'high'];
+    const severityOptions = ['low', 'medium', 'high', 'critical'];
 
     onMount(() => {
  
@@ -108,6 +110,17 @@
         }
         let result = await addIssueAPI(data, token);
 
+        if (result != 500){
+            showAddIssuediv = false;
+            Swal.fire({
+                theme: 'dark',
+                title: 'Success',
+                text: 'Issue added successfully!',
+                icon: 'success'
+            });
+            await getAllIssues();
+        }
+
     }
 
 
@@ -176,7 +189,8 @@
     let deleteIssue = async(issueId) => {
         const token = await get_token();
         let data = await deleteIssueAPI(issueId,token);
-
+        console.log("Delete Issue Response: ", data);
+        
         if(data == 200)
             return true;
 
@@ -190,7 +204,7 @@
     
 </script>
 
-
+<Header />
 <section class="container mt-4">
     <div class="row">
         <div class="col-12 d-flex justify-content-between align-items-center mb-3">
