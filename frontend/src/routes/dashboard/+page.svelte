@@ -4,6 +4,7 @@
     import {role} from '$lib/issues/roles';
     import { onMount, onDestroy } from 'svelte';
     import {PUBLIC_WEBSOCKET_URL} from '$env/static/public';
+    import SeverityChart from '$lib/chart/severityChart.svelte';
 
     import Swal from 'sweetalert2';
 
@@ -15,6 +16,7 @@
     let issueTitle = '';
     let issueDescription = '';
 
+    let showChartModal = false;
 
     let editingIssue = null;
     let editIssueTitle = '';
@@ -54,6 +56,10 @@
         showAddIssuediv = true;
     }
 
+    function showSeverityChart() {
+        showChartModal = true;
+    }
+    
     function openEditModal(issue) {
         editingIssue = issue;
         editIssueTitle = issue.title;
@@ -189,7 +195,12 @@
     <div class="row">
         <div class="col-12 d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">Issues</h2>
-            <button on:click={addIssueDIV}> + Add Issue </button>
+            <div>
+                <button class="btn btn-info me-2" on:click={showSeverityChart}>
+                    <i class="bi bi-graph-up"></i> Severity Chart
+                </button>
+                <button class="btn btn-success" on:click={addIssueDIV}> + Add Issue </button>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -317,6 +328,7 @@
 </div>
 {/if}
 
+<SeverityChart {issues} bind:showModal={showChartModal} />
 <div style="display:none;">{fetchData()}</div>
 
 <style>
