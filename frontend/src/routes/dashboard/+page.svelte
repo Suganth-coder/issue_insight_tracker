@@ -1,9 +1,23 @@
 <script>
+    import {addAttachment} from '$lib/issues/issueManagement';
+    import {useClerkContext} from 'svelte-clerk/client';
+
     let issues = [];
     let showAddIssuediv = false;
 
     function addIssue(){
         showAddIssuediv = true;
+    }
+
+    const context = useClerkContext();
+    let get_token = async () => {
+        return await context.session?.getToken();
+    };
+
+    let uploadAttachment = async(file) => {
+        if (!file) return;
+        const token = await get_token();
+        addAttachment(file, token);
     }
 </script>
 
@@ -48,7 +62,7 @@
             </div>
             <div class="form-group mb-4">
             <label for="issueFile">Attachment (Optional)</label>
-            <input type="file" class="form-control" id="issueFile">
+            <input type="file" class="form-control" id="issueFile" on:change={uploadAttachment} name="attachment">
             </div>
         </div>
         <div class="popup-footer">
