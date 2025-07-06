@@ -2,6 +2,8 @@
     import {addAttachmentAPI, addIssueAPI, getAllIssuesAPI, updateIssueAPI, deleteIssueAPI, getUserRoleAPI} from '$lib/issues/issueManagement';
     import {useClerkContext} from 'svelte-clerk/client';
     import {role} from '$lib/issues/roles';
+    import { onMount, onDestroy } from 'svelte';
+    import {PUBLIC_WEBSOCKET_URL} from '$env/static/public';
 
     import Swal from 'sweetalert2';
 
@@ -20,9 +22,33 @@
     let editIssueStatus = '';
     let editIssueSeverity = '';
     let editIssueId = null;
+    let socket;
 
     const statusOptions = ['open', 'triaged', 'in_progress', 'done'];
     const severityOptions = ['low', 'medium', 'high'];
+
+    onMount(() => {
+ 
+    socket = new WebSocket(PUBLIC_WEBSOCKET_URL);
+    
+    socket.addEventListener('open', (event) => {
+        console.log('Connected to WebSocket server');
+    });
+
+    socket.addEventListener('message', (event) => {
+        getAllIssues();
+        console.log('Message from server:', event.data);
+    });
+    
+    socket.addEventListener('error', (event) => {
+        console.error('WebSocket error:', event);
+    });
+
+    socket.addEventListener('closed', (event) => {
+        console.log('Connection closed:', event);
+    });
+
+    });
 
     function addIssueDIV(){
         showAddIssuediv = true;
