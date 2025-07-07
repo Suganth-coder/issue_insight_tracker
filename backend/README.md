@@ -11,7 +11,7 @@ Pre Requisite
 
 Poetry to used to manage the all the dependencies easily
 
-cd `/backend` and RUN,
+cd into the backend folder `backend/` and RUN,
 ```sh
 poetry install
 ```
